@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "chandra-document-mae"
+version = "0.1.0"
+description = "DAVE-style raw-pixel MAE for the Chandra 2 vision tower"
+requires-python = ">=3.11"
+dependencies = [
+  "accelerate>=1.0",
+  "huggingface-hub>=0.30",
+  "numpy>=1.26",
+  "peft>=0.19",
+  "pillow>=10",
+  "pyyaml>=6",
+  "rapidfuzz>=3.0",
+  "safetensors>=0.5",
+  "tensorboard>=2.18",
+  "torch>=2.5",
+  "tqdm>=4.66",
+  "transformers>=5.0",
+  "wandb>=0.19",
+]
+
+[project.optional-dependencies]
+unsloth = ["unsloth>=2026.7.3"]
+
+[tool.setuptools.packages.find]
+include = ["chandra_alignment*", "chandra_mae*"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]

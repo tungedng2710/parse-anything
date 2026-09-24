@@ -1,0 +1,1 @@
+"""Cognidoc source package."""

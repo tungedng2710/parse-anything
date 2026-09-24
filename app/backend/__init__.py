@@ -1,0 +1,1 @@
+"""MonkeyOCR web application backend."""

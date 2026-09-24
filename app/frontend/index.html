@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Parse documents into Markdown and structured layouts">
+  <title>ParseAnything — Document parser</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/">
+      <img src="https://raw.githubusercontent.com/tungedng2710/tungedng2710.github.io/main/public/assets/images/logo.png" alt="">
+      <span><strong>ParseAnything</strong><small>Document parser</small></span>
+    </a>
+    <div class="service-status" id="service-status"><span class="status-dot"></span><span id="service-label">Connecting</span></div>
+  </header>
+  <main>
+    <section class="workspace">
+      <article class="panel source-panel">
+        <div class="panel-header">
+          <div><p class="step">01 / INPUT</p><h2>Source document</h2></div>
+          <button class="text-button" id="sample-button">Load sample</button>
+        </div>
+        <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Upload a document">
+          <input id="file-input" type="file" accept="image/png,image/jpeg,image/webp,image/bmp,image/tiff,application/pdf" hidden>
+          <div class="empty-state" id="empty-state">
+            <svg viewBox="0 0 24 24"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 13v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg>
+            <strong>Drop a document here</strong><span>or click to browse · PNG, JPG, WebP, TIFF, PDF</span>
+          </div>
+          <div class="preview-loading" id="preview-loading" hidden><span></span><p>Preparing page previews…</p></div>
+          <img id="image-preview" alt="Selected document preview" hidden>
+          <div class="pdf-pages" id="pdf-pages" hidden></div>
+        </div>
+        <div class="page-tools" id="page-tools" hidden>
+          <span id="page-selection-label">0 pages selected</span>
+          <div>
+            <label class="batch-control">Batch <span class="batch-stepper"><button id="batch-decrease" type="button" aria-label="Decrease batch size">−</button><input id="batch-size" type="number" min="1" max="1" step="1" value="1" inputmode="numeric" aria-label="OCR page batch size"><button id="batch-increase" type="button" aria-label="Increase batch size">+</button></span></label>
+            <button id="select-all-button">Select all</button><button id="select-none-button">Select none</button>
+          </div>
+        </div>
+        <div class="file-meta" id="file-meta" hidden>
+          <div><span class="file-icon">DOC</span><div><strong id="file-name"></strong><span id="file-size"></span></div></div>
+          <button id="remove-button" aria-label="Remove selected file">×</button>
+        </div>
+      </article>
+      <article class="panel result-panel">
+        <div class="panel-header result-header">
+          <div><p class="step">02 / OUTPUT</p><h2>Parsed content</h2></div>
+          <div class="result-actions"><button class="icon-button" id="copy-button" disabled>Copy</button><button class="icon-button" id="download-button" disabled>Markdown</button><button class="icon-button" id="json-download-button" disabled>JSON</button></div>
+        </div>
+        <div class="result-toolbar" id="result-toolbar" hidden>
+          <div class="view-tabs" role="tablist" aria-label="Result view">
+            <button class="active" id="markdown-tab" role="tab" aria-selected="true">Markdown</button>
+            <button id="layout-tab" role="tab" aria-selected="false">Layout</button>
+            <button id="raw-tab" role="tab" aria-selected="false">Raw</button>
+          </div>
+          <div class="toolbar-end">
+            <div class="zoom-controls" id="zoom-controls" hidden aria-label="Layout zoom controls">
+              <button id="zoom-out-button" type="button" aria-label="Zoom out">−</button>
+              <button id="zoom-reset-button" type="button" aria-label="Reset zoom">100%</button>
+              <button id="zoom-in-button" type="button" aria-label="Zoom in">+</button>
+            </div>
+            <div class="page-navigator" id="page-navigator" hidden aria-label="Result page navigation">
+              <button id="previous-page-button" type="button">Previous</button>
+              <label for="result-page">Page</label>
+              <input id="result-page" type="number" min="1" step="1" inputmode="numeric" aria-label="Jump to result page">
+              <span id="result-page-total" aria-hidden="true"></span>
+              <button id="next-page-button" type="button">Next</button>
+            </div>
+          </div>
+        </div>
+        <div class="output-shell">
+          <div class="output-empty" id="output-empty"><span class="output-glyph">{ }</span><p>Your parsed document will appear here.</p></div>
+          <article class="markdown-preview" id="markdown-preview" hidden></article>
+          <pre class="raw-markdown" id="raw-markdown" hidden></pre>
+          <div class="layout-preview" id="layout-preview" hidden>
+            <div class="layout-stage" id="layout-stage">
+              <div class="layout-canvas" id="layout-canvas"><img id="layout-image" alt="OCR page with layout detections"><svg id="layout-overlay" preserveAspectRatio="none"></svg></div>
+            </div>
+            <div class="layout-legend" id="layout-legend"></div>
+          </div>
+          <section class="element-editor" id="element-editor" hidden aria-label="Edit detected content">
+            <div class="element-editor-header">
+              <div><span>Edit detected content</span><strong id="element-editor-title"></strong></div>
+              <button id="element-editor-close" type="button" aria-label="Close editor">×</button>
+            </div>
+            <textarea id="element-content-input" spellcheck="true" aria-label="Detected content"></textarea>
+            <fieldset class="bbox-fields">
+              <legend>Bounding box · pixels</legend>
+              <label>X1<input id="bbox-x1" type="number" min="0" step="1"></label>
+              <label>Y1<input id="bbox-y1" type="number" min="0" step="1"></label>
+              <label>X2<input id="bbox-x2" type="number" min="0" step="1"></label>
+              <label>Y2<input id="bbox-y2" type="number" min="0" step="1"></label>
+            </fieldset>
+            <label class="include-control"><input id="element-include-input" type="checkbox"> Include this element in Markdown</label>
+            <div class="element-editor-actions"><button id="element-editor-cancel" type="button">Cancel</button><button id="element-editor-save" type="button">Save changes</button></div>
+          </section>
+          <div class="processing" id="processing" hidden>
+            <div class="processing-thumbnail" id="processing-thumbnail" hidden>
+              <img id="processing-image" alt="First page being parsed">
+            </div>
+            <span>Reading document structure…</span>
+          </div>
+        </div>
+        <div class="result-meta"><span id="result-stats">Awaiting document</span><span>MARKDOWN / UTF-8</span></div>
+      </article>
+    </section>
+    <section class="control-bar">
+      <div class="run-status" id="run-status"><span></span><p id="run-label">Select a document</p></div>
+      <button class="clear-button" id="clear-button">Clear</button>
+      <button class="run-button" id="run-button" disabled>Parse</button>
+    </section>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/marked@15.0.12/marked.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js" defer></script>
+  <script src="/static/app.js" defer></script>
+</body>
+</html>

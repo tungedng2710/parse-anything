@@ -1,0 +1,47 @@
+# Paired dataset layout:
+#   alignment_dataset/images/<relative-name>.<image-extension>
+#   alignment_dataset/labels/<relative-name>.json
+dataset: alignment_dataset
+images_subdir: images
+labels_subdir: labels
+prompt: Extract the document as JSON. Return JSON only.
+validation_fraction: 0.02
+document_id_regex: '_page\d+$'
+
+# Omit these to discover the latest compatible MAE delta under ./outputs.
+base_model: datalab-to/chandra-ocr-2
+mae_delta: outputs/chandra2-mae-full/chandra_vision_delta.safetensors
+output_dir: outputs/chandra2-alignment
+
+min_pixels: 65536
+max_pixels: 589824
+max_sequence_length: 8192
+# "skip" drops targets that do not fit; use "error" to fail fast instead.
+overlength_policy: skip
+attention_implementation: sdpa
+
+batch_size: 2
+gradient_accumulation_steps: 32
+max_steps: 2000
+merger_learning_rate: 0.0001
+train_vision: false
+vision_learning_rate: 0.000002
+weight_decay: 0.01
+warmup_ratio: 0.03
+max_grad_norm: 1.0
+mixed_precision: bf16
+gradient_checkpointing: true
+
+shuffle_buffer: 2000
+num_workers: 2
+log_every: 1
+eval_every: 250
+eval_batches: 25
+save_every: 250
+keep_last_checkpoints: 3
+seed: 42
+
+# Use tensorboard, wandb, tensorboard,wandb, or none.
+report_to: tensorboard
+tracker_project_name: chandra-alignment
+tracker_run_name: chandra-alignment-run

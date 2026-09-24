@@ -1,0 +1,6 @@
+fastapi>=0.136,<1
+uvicorn[standard]>=0.49,<1
+python-multipart>=0.0.20,<1
+openai>=2.42,<3
+PyMuPDF>=1.27,<2
+Pillow>=11,<13

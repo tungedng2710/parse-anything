@@ -1,0 +1,22 @@
+dataset: alignment_dataset
+images_subdir: images
+labels_subdir: labels
+prompt: Extract the document as JSON. Return JSON only.
+validation_fraction: 0.02
+document_id_regex: '_page\d+$'
+split: validation
+
+# These are resolved from the alignment manifest when omitted.
+alignment_dir: outputs/chandra2-alignment
+output_dir: outputs/chandra2-alignment-benchmark
+variants: base,mae,aligned
+
+max_samples: 200
+batch_size: 1
+min_pixels: 65536
+max_pixels: 589824
+max_input_length: 8192
+max_new_tokens: 32768
+attention_implementation: sdpa
+mixed_precision: bf16
+seed: 42

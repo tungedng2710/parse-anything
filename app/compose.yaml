@@ -1,0 +1,15 @@
+services:
+  parseanything:
+    build:
+      context: .
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      HOST: 0.0.0.0
+      PORT: 8000
+    ports:
+      - "${PORT:-8000}:8000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped

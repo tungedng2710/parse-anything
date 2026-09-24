@@ -1,0 +1,52 @@
+dataset: sft_dataset
+images_subdir: images
+labels_subdir: labels
+prompt: Extract the document as JSON. Return JSON only.
+validation_fraction: 0.02
+document_id_regex: '_page\d+$'
+
+base_model: datalab-to/chandra-ocr-2
+load_adapted_vision: true
+mae_delta: outputs/chandra2-mae-full/chandra_vision_delta.safetensors
+alignment_delta: outputs/chandra2-alignment/alignment_merger_delta.safetensors
+alignment_dir: outputs/chandra2-alignment
+output_dir: outputs/chandra2-sft
+backend: unsloth
+unsloth_fullgraph: true
+
+min_pixels: 65536
+max_pixels: 589824
+max_sequence_length: 8192
+overlength_policy: skip
+attention_implementation: sdpa
+
+batch_size: 1
+gradient_accumulation_steps: 32
+max_steps: 2000
+
+# Covers Qwen 3.5 full-attention, gated-delta, and MLP projections.
+lora_rank: 8
+lora_alpha: 16
+lora_dropout: 0.0
+lora_target_modules: q_proj,k_proj,v_proj,o_proj,in_proj_qkv,in_proj_z,in_proj_b,in_proj_a,out_proj,gate_proj,up_proj,down_proj
+lora_learning_rate: 0.0001
+merger_learning_rate: 0.00005
+weight_decay: 0.01
+warmup_ratio: 0.03
+max_grad_norm: 1.0
+mixed_precision: bf16
+gradient_checkpointing: true
+
+shuffle_buffer: 2000
+num_workers: 2
+log_every: 1
+eval_every: 250
+eval_batches: 25
+save_every: 250
+keep_last_checkpoints: 3
+seed: 42
+
+# Use tensorboard, wandb, tensorboard,wandb, or none.
+report_to: tensorboard
+tracker_project_name: chandra-sft
+tracker_run_name: chandra-sft-run

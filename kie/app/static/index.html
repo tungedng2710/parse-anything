@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Extract structured JSON from documents with NuExtract3." />
+    <title>NuExtract Studio</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="ambient ambient-one"></div>
+    <div class="ambient ambient-two"></div>
+
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="NuExtract Studio home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 28 28" role="img">
+            <path d="M7.2 4.5h9.3l4.3 4.3v14.7H7.2z" />
+            <path d="M16.5 4.5v4.4h4.3M10.4 13h7.2M10.4 16.5h7.2M10.4 20h4.5" />
+          </svg>
+        </span>
+        <span>NuExtract <strong>Studio</strong></span>
+      </a>
+      <div class="model-pill">
+        <span class="status-dot" id="status-dot"></span>
+        <span id="model-status">Checking model</span>
+        <span class="pill-divider"></span>
+        <span>NuExtract3</span>
+      </div>
+    </header>
+
+    <main>
+      <section class="workspace" aria-label="Document extraction workspace">
+        <form class="panel input-panel" id="extract-form">
+          <div class="panel-heading">
+            <div>
+              <span class="step-number">01</span>
+              <h2>Configure extraction</h2>
+            </div>
+            <button class="text-button" id="reset-button" type="button">Reset</button>
+          </div>
+
+          <div class="field-block">
+            <div class="field-label-row">
+              <label>Source document</label>
+              <span>PDF, PNG, JPG or WebP</span>
+            </div>
+            <div class="dropzone" id="document-dropzone" tabindex="0" role="button" aria-label="Upload source document">
+              <input id="document-input" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,application/pdf,image/png,image/jpeg,image/webp" hidden />
+              <div class="upload-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 14.5v3A2.5 2.5 0 0 0 7.5 20h9a2.5 2.5 0 0 0 2.5-2.5v-3" /></svg>
+              </div>
+              <p><strong>Drop your document here</strong></p>
+              <p class="dropzone-hint">or click to browse · up to 40 MB</p>
+            </div>
+            <div class="file-selection hidden" id="document-selection">
+              <div class="file-icon" id="document-file-icon">PDF</div>
+              <div class="file-info">
+                <strong id="document-name"></strong>
+                <span id="document-meta"></span>
+              </div>
+              <button class="icon-button" type="button" id="remove-document" aria-label="Remove document">×</button>
+            </div>
+            <div class="document-preview hidden" id="document-preview"></div>
+          </div>
+
+          <div class="field-block">
+            <div class="field-label-row">
+              <label>Extraction template</label>
+              <div class="template-actions">
+                <button class="inline-action" type="button" id="type-template">Type JSON</button>
+                <button class="inline-action" type="button" id="sample-template">Use sample</button>
+              </div>
+            </div>
+            <div class="dropzone compact" id="template-dropzone" tabindex="0" role="button" aria-label="Upload JSON template">
+              <input id="template-input" type="file" accept=".json,application/json" hidden />
+              <div class="json-symbol" aria-hidden="true">{ }</div>
+              <div>
+                <p><strong>Drop a JSON template</strong></p>
+                <p class="dropzone-hint">Defines the fields and types to extract</p>
+              </div>
+            </div>
+            <div class="file-selection hidden" id="template-selection">
+              <div class="file-icon json">JSON</div>
+              <div class="file-info">
+                <strong id="template-name"></strong>
+                <span id="template-meta"></span>
+              </div>
+              <button class="edit-template-button" type="button" id="edit-template">Edit</button>
+              <button class="icon-button" type="button" id="remove-template" aria-label="Remove template">×</button>
+            </div>
+            <pre class="template-preview hidden" id="template-preview"></pre>
+          </div>
+
+          <div class="field-block optional-block">
+            <label for="instructions">Instructions <span>Optional</span></label>
+            <textarea id="instructions" rows="3" placeholder="Example: Keep dates exactly as printed in the document."></textarea>
+          </div>
+
+          <label class="thinking-control">
+            <span>
+              <strong>Reasoning mode</strong>
+              <small>Better for dense or ambiguous layouts; takes longer.</small>
+            </span>
+            <span class="switch">
+              <input id="thinking" type="checkbox" />
+              <span class="switch-track"></span>
+            </span>
+          </label>
+
+          <div class="form-error hidden" id="form-error" role="alert"></div>
+          <button class="primary-button" id="extract-button" type="submit">
+            <span class="button-label">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.64 5.64l2.12 2.12M16.24 16.24l2.12 2.12M18.36 5.64l-2.12 2.12M7.76 16.24l-2.12 2.12" /></svg>
+              Extract document
+            </span>
+            <span class="button-loading hidden"><span class="spinner"></span>Reading document…</span>
+          </button>
+        </form>
+
+        <section class="panel result-panel" aria-live="polite">
+          <div class="panel-heading result-heading">
+            <div>
+              <span class="step-number">02</span>
+              <h2>Extraction result</h2>
+            </div>
+            <div class="result-actions hidden" id="result-actions">
+              <button class="secondary-button" id="copy-button" type="button" title="Copy JSON">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8h11v12H8zM5 16H4V4h11v1" /></svg>
+                Copy
+              </button>
+              <button class="download-button" id="download-button" type="button">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 20h14" /></svg>
+                Download JSON
+              </button>
+            </div>
+          </div>
+
+          <div class="result-empty" id="result-empty">
+            <div class="empty-visual" aria-hidden="true">
+              <div class="scan-line"></div>
+              <svg viewBox="0 0 180 140">
+                <rect x="42" y="16" width="96" height="112" rx="8" />
+                <path d="M58 45h64M58 60h42M58 83h64M58 98h54" />
+                <circle cx="119" cy="103" r="21" />
+                <path d="m111 103 5 5 11-12" />
+              </svg>
+            </div>
+            <h3>Your structured data will appear here</h3>
+            <p>Add a document and template, then start extraction.</p>
+          </div>
+
+          <div class="result-loading hidden" id="result-loading">
+            <div class="loading-orbit"><span></span><span></span><span></span></div>
+            <h3>Understanding your document</h3>
+            <p id="loading-message">Rendering pages and reading the layout…</p>
+            <div class="progress-track"><div class="progress-bar"></div></div>
+          </div>
+
+          <div class="result-content hidden" id="result-content">
+            <div class="result-summary" id="result-summary"></div>
+            <div class="tabs" role="tablist">
+              <button class="tab active" type="button" data-tab="visual" role="tab">Structured view</button>
+              <button class="tab" type="button" data-tab="raw" role="tab">Raw JSON</button>
+            </div>
+            <div class="tab-panel" id="visual-panel" role="tabpanel">
+              <div class="data-tree" id="data-tree"></div>
+            </div>
+            <div class="tab-panel hidden" id="raw-panel" role="tabpanel">
+              <pre class="raw-json" id="raw-json"></pre>
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <div class="template-dialog hidden" id="template-editor-dialog" role="dialog" aria-modal="true" aria-labelledby="template-editor-title">
+      <div class="template-dialog-shell">
+        <div class="template-dialog-header">
+          <div>
+            <span class="dialog-eyebrow">Extraction template</span>
+            <h2 id="template-editor-title">Edit JSON fields</h2>
+          </div>
+          <button class="dialog-close" type="button" id="close-template-editor" aria-label="Close template editor">×</button>
+        </div>
+
+        <div class="template-editor-tabs" role="tablist" aria-label="Template editor view">
+          <button class="template-editor-tab active" type="button" data-editor-tab="table" role="tab" aria-selected="true">Key-value table</button>
+          <button class="template-editor-tab" type="button" data-editor-tab="raw" role="tab" aria-selected="false">Raw JSON</button>
+        </div>
+
+        <div class="template-editor-body">
+          <div class="template-table-panel" id="template-table-panel" role="tabpanel">
+            <div class="template-table-wrap">
+              <table class="template-table">
+                <thead>
+                  <tr>
+                    <th>Key</th>
+                    <th>Type / value</th>
+                    <th><span class="sr-only">Actions</span></th>
+                  </tr>
+                </thead>
+                <tbody id="template-fields"></tbody>
+              </table>
+              <div class="template-table-empty hidden" id="template-table-empty">No fields yet. Add one below or paste JSON in Raw JSON.</div>
+            </div>
+            <button class="add-field-button" type="button" id="add-template-field">+ Add top-level field</button>
+          </div>
+
+          <div class="template-raw-panel hidden" id="template-raw-panel" role="tabpanel">
+            <label for="template-raw-input">JSON template</label>
+            <textarea class="template-raw-editor" id="template-raw-input" spellcheck="false" aria-label="Raw JSON template"></textarea>
+          </div>
+          <div class="template-editor-error hidden" id="template-editor-error" role="alert"></div>
+        </div>
+
+        <div class="template-dialog-footer">
+          <span>Edits are used for the next extraction.</span>
+          <div>
+            <button class="dialog-cancel" type="button" id="cancel-template-editor">Cancel</button>
+            <button class="dialog-apply" type="button" id="apply-template-editor">Apply template</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <datalist id="template-type-options">
+      <option value="verbatim-string"></option>
+      <option value="string"></option>
+      <option value="integer"></option>
+      <option value="number"></option>
+      <option value="date"></option>
+      <option value="time"></option>
+      <option value="date-time"></option>
+      <option value="duration"></option>
+      <option value="boolean"></option>
+      <option value="country"></option>
+      <option value="currency"></option>
+      <option value="language"></option>
+      <option value="language-tag"></option>
+      <option value="url"></option>
+      <option value="email-address"></option>
+      <option value="phone-number"></option>
+      <option value="iban"></option>
+      <option value="bic"></option>
+      <option value="unit-code"></option>
+    </datalist>
+
+    <div class="toast" id="toast" role="status"></div>
+    <script src="/static/app.js" defer></script>
+  </body>
+</html>

@@ -1,0 +1,29 @@
+model: datalab-to/chandra-ocr-2
+dataset: sample_dataset
+output_dir: outputs/chandra2-mae
+
+# DAVE-style objective from docs/chandra2_document_ai_training_plan.md
+mask_ratio: 0.75
+decoder_hidden_size: 384
+decoder_layers: 4
+decoder_heads: 6
+
+# Chandra-native resize, capped to keep decoder attention tractable.
+min_pixels: 65536       # 256 x 256
+max_pixels: 589824      # 768 x 768
+
+batch_size: 1
+gradient_accumulation_steps: 512
+max_steps: 5000
+vision_learning_rate: 0.00001
+decoder_learning_rate: 0.0001
+weight_decay: 0.05
+warmup_ratio: 0.05
+max_grad_norm: 1.0
+mixed_precision: bf16
+gradient_checkpointing: true
+num_workers: 4
+log_every: 10
+save_every: 500
+keep_last_checkpoints: 3
+seed: 42
