@@ -2,7 +2,8 @@
 
 Research task: document image(s) plus a supplied JSON template produce filled
 JSON. Use the default `image` input mode for experiments in the proposal;
-PDFs are rendered to images during preparation.
+PDFs are rendered to images during preparation. NuExtract3 is the baseline and
+the model being improved; the pipeline adapts that checkpoint with LoRA/QLoRA.
 
 Run commands from the `kie/` repository directory. This pipeline is separate from
 the FastAPI demo and uses local Hugging Face weights rather than the vLLM endpoint.
@@ -100,9 +101,10 @@ full-model export; speculative MTP serving is outside this pipeline.
 Generate baseline and adapted predictions using matching image budgets and
 the same immutable base revision. Both commands use greedy decoding; this is a
 controlled baseline, distinct from the publisher's sampled serving defaults.
-The default baseline includes descriptions (B1 in the proposal). Add
-`--no-field-instructions` and a separate output directory for the types-only B0
-ablation; compare B1 against the adapted model to isolate the training effect.
+The default unmodified checkpoint with the current native prompt, template
+descriptions, image budget and decoding is B0 in the proposal. Freeze those
+settings for baseline/adapter comparisons. `--no-field-instructions` supports an
+optional types-only prompt diagnostic; it does not define the primary baseline.
 
 ```bash
 python -m training.predict --manifest artifacts/tt32/test.jsonl \
