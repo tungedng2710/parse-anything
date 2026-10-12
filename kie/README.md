@@ -56,3 +56,11 @@ python data/medial_9_forms/eval.py \
 The evaluator uses normalized indel similarity for string leaves and exact match
 for non-string leaves. Missing and extra leaf paths score zero. It reports both
 macro (equal weight per document) and micro (equal weight per leaf) metrics.
+
+## TT32 research and adaptation
+
+See the [NuExtract3 research proposal](docs/nuextract3_tt32_research_proposal.md)
+for the local dataset audit and proposed improvements, and the
+[training pipeline guide](training/README.md) for CPU preparation, CUDA
+LoRA/QLoRA training, baseline/adapted inference and evaluation commands.
+GPU training and inference have not been tested on this device.

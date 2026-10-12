@@ -1,0 +1,9 @@
+# Separate from the FastAPI demo; install on the training GPU host.
+# API ranges researched 2026-10-12; GPU execution has not been validated locally.
+torch>=2.10,<3
+transformers>=5.19,<5.20
+peft>=0.21,<0.22
+accelerate>=1.15,<2
+PyMuPDF>=1.27,<2
+Pillow>=11,<13
+# For --qlora, install bitsandbytes>=0.49 separately on a supported CUDA host.
