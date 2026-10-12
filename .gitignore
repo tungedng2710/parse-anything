@@ -267,3 +267,5 @@ asssets/test_samples
 
 # ExtractAnything sensitive data
 kie/data
+# TT32 rendered medical data, manifests, predictions, and training adapters.
+kie/artifacts/
